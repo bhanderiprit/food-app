@@ -1,13 +1,14 @@
-import userModel from "../model/user.model.js";
+import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import config from '../config/config.js'
 import mongoose from "mongoose";
-import sessionModel from "../model/session.model.js";
+import sessionModel from "../models/session.model.js";
 import sendEmail from "../service/email.service.js";
-import otpModel from "../model/otps.model.js";
+import otpModel from "../models/otps.model.js";
 import { generateOTP, getOtpHtml } from "../utils/email.utils.js"
+import foodPartnerModel from "../models/foodPartner.model.js";
 
 async function register(req, res) {
     try {
@@ -21,6 +22,7 @@ async function register(req, res) {
 
         const existingUser = await userModel.findOne({
             $or: [{ username }, { email }]
+            
         });
 
         if (existingUser) {
@@ -51,7 +53,7 @@ async function register(req, res) {
             otp : otpHash
         })
 
-        await sendEmail(emaqil, "otp verification", `your otp code is ${otp}`, otpHtml)
+        await sendEmail(email, "otp verification", `your otp code is ${otp}`, otpHtml)
 
 
         res.status(201).json({
@@ -74,10 +76,10 @@ async function register(req, res) {
 
 async function login(req, res) {
 
-    const { username, password } = req.body
+    const { email, password } = req.body
 
     const user = await userModel.findOne({
-        username
+        email
     })
 
     if (!user) {
@@ -324,6 +326,134 @@ async function verifyEmail(req,res){
 })
 }
 
+async function getMe(req, res){
+    res.status(200).json({
+        user: req.user
+    });
+}
 
 
-export { register, refresh, login, logout, logoutAll , verifyEmail };
+async function registerFoodPartner(req,res){
+    
+        const { name, email, password } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                message: "All fields are required"
+            });
+        }   
+
+        const existingFoodPartner = await foodPartnerModel.findOne({
+            $or: [{ name }, { email }]
+        });
+
+        if (existingFoodPartner) {
+            return res.status(400).json({
+                message: "Food partner with this name or email already exists"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const foodPartner = await foodPartnerModel.create({
+            name,
+            email,
+            password: hashedPassword
+        });
+
+        const token = jwt.sign({ id: foodPartner._id }, config.JWT);
+
+        res.cookie('foodPartnerToken', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(201).json({
+            message: "Food partner created",
+            foodPartner: {
+                id: foodPartner._id,
+                name: foodPartner.name,
+                email: foodPartner.email
+            },
+            token
+        });
+
+}
+
+
+async function loginFoodPartner(req, res) {
+    const { email, password } = req.body;
+
+    const foodPartner = await foodPartnerModel.findOne({ email });
+
+    if (!foodPartner) {
+        return res.status(400).json({
+            message: "Invalid email or password"
+        });
+    }
+
+    const isMatch = await bcrypt.compare(password, foodPartner.password);
+
+    if (!isMatch) {
+        return res.status(400).json({
+            message: "Invalid email or password"
+        });
+    }
+
+    const token = jwt.sign({ id: foodPartner._id }, config.JWT);
+
+    res.cookie('foodPartnerToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({
+        message: "Food partner logged in",
+        foodPartner: {
+            id: foodPartner._id,
+            name: foodPartner.name,
+            email: foodPartner.email
+        },
+        token
+    });
+}
+
+async function logoutFoodPartner(req,res) {
+
+    const token = req.cookies.foodPartnerToken
+
+    if(!token){
+        return res.status(400).json({
+            message : 'token not found'
+        })
+    }
+
+    let isTokenVelied = ''
+    try {
+         isTokenVelied = jwt.verify(token,process.env.JWT)
+
+    } catch (error) {
+        console.log(error);
+        
+    }
+
+    if(!isTokenVelied){
+        return req.status(400).json({
+            message : 'token is not velied'
+        })
+     }
+    
+     res.clearCookie('foodPartnerToken')
+
+     res.status(200).json({
+        message : 'logout successfully'
+     })
+    
+}
+
+
+export { register, refresh, login, logout, logoutAll , verifyEmail , registerFoodPartner, loginFoodPartner,logoutFoodPartner,getMe};

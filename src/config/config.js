@@ -9,7 +9,9 @@ const config = {
     GOOGLE_CLINT_ID : process.env.GOOGLE_CLINT_ID,
     GOOGLE_CLINT_SECRET:process.env.GOOGLE_CLINT_SECRET,
     GOOGLE_REFRESH_TOKEN : process.env.GOOGLE_REFRESH_TOKEN,
-    GOOGLE_USER : process.env.GOOGLE_USER
+    GOOGLE_USER : process.env.GOOGLE_USER,
+    IMAGEKIT_PRIVATE_KEY : process.env.IMAGEKIT_PRIVATE_KEY,
+    PORT : process.env.PORT
 
 }
 
@@ -30,6 +32,12 @@ if (!config.GOOGLE_REFRESH_TOKEN) {
 }
 if (!config.GOOGLE_USER) {
     throw new Error("GOOGLE_USER is not defined in the environment variables");
+}
+if (!config.IMAGEKIT_PRIVATE_KEY) {
+    throw new Error("IMAGEKIT_PRIVATE_KEY is not defined in the environment variables");
+}
+if (!config.PORT) {
+    throw new Error("PORT is not defined in the environment variables");
 }
 
 export default config

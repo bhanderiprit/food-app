@@ -1,14 +1,25 @@
 import express from 'express'
-import {register,refresh,login, logout, logoutAll ,verifyEmail} from '../controllers/auth.controller.js'
+import {register,refresh,login, logout, logoutAll ,verifyEmail,registerFoodPartner,loginFoodPartner, logoutFoodPartner ,getMe} from '../controllers/auth.controller.js'
+import UserAuth from '../middleware/UserAuth.middleware.js'
+import authFoodPartner from '../middleware/foodPartner.middleware.js'
+import { getFoodParetner } from '../controllers/food.controller.js'
 
 const router = express.Router()
 
-router.post('/register',register)
-router.post('/refresh',refresh)
-router.post('/login',login)
-router.get('/logout',logout)
-router.get('/logoutAll',logoutAll)
-router.get('/verifyEmail',verifyEmail)
+router.post('/user/register',register)
+router.post('/user/refresh',refresh)
+router.post('/user/login',login)
+router.get('/user/logout',logout)
+router.get('/user/logoutAll',logoutAll)
+router.post('/user/verifyEmail',verifyEmail)
+router.get('/user/me', UserAuth, getMe);
+
+
+
+router.post('/foodPartner/register',registerFoodPartner)
+router.post('/foodPartner/login',loginFoodPartner)
+router.get('/foodPartner/logout',logoutFoodPartner)
+router.get('/foodPartner/getFoodPartner',authFoodPartner,getFoodParetner)
 
 
 export default router
