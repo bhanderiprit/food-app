@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import config from '../config/config.js'
 import mongoose from "mongoose";
 import sessionModel from "../models/session.model.js";
-import sendEmail from "../service/email.service.js";
+import {sendEmail} from "../service/email.service.js";
 import otpModel from "../models/otps.model.js";
 import { generateOTP, getOtpHtml } from "../utils/email.utils.js"
 import foodPartnerModel from "../models/foodPartner.model.js";
@@ -68,10 +68,14 @@ async function register(req, res) {
         });
 
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        },);
-    }
+    console.error("Register Error:", error);
+
+    res.status(500).json({
+        success: false,
+        message: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    });
+}
 }
 
 async function login(req, res) {

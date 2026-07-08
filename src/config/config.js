@@ -11,7 +11,8 @@ const config = {
     GOOGLE_REFRESH_TOKEN : process.env.GOOGLE_REFRESH_TOKEN,
     GOOGLE_USER : process.env.GOOGLE_USER,
     IMAGEKIT_PRIVATE_KEY : process.env.IMAGEKIT_PRIVATE_KEY,
-    PORT : process.env.PORT
+    PORT : process.env.PORT,
+    RESEND_API_KEY : process.env.RESEND_API_KEY
 
 }
 
@@ -39,5 +40,7 @@ if (!config.IMAGEKIT_PRIVATE_KEY) {
 if (!config.PORT) {
     throw new Error("PORT is not defined in the environment variables");
 }
-
+if (!config.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not defined in the environment variables");
+}
 export default config
