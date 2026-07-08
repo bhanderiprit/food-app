@@ -53,7 +53,14 @@ async function register(req, res) {
             otp : otpHash
         })
 
-        await sendEmail(email, "otp verification", `your otp code is ${otp}`, otpHtml)
+        try {
+            await sendEmail(email, "otp verification", `your otp code is ${otp}`, otpHtml)
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return res.status(500).json({
+                message: "Failed to send OTP email"
+            });
+        }
 
 
         res.status(201).json({

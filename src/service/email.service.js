@@ -48,7 +48,7 @@ const resend = new Resend(config.RESEND_API_KEY);
 
 export async function sendEmail(to, subject, text, html) {
   const { error } = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "Food App <noreply@foodfeed.online>",
     to,
     subject,
     text,

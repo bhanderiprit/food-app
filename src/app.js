@@ -7,7 +7,8 @@ import cors from 'cors'
 
 const app = express()
 app.use(cors({                         
-    origin : ['http://localhost:5173','https://food-app-frontend-hkcb9pcxl-bhanderiprits-projects.vercel.app','https://food-app-frontend-red-three.vercel.app'],
+    origin : ['http://localhost:5173',"https://foodfeed.online",
+      "https://www.foodfeed.online"],
     credentials : true
 }))
 app.use(cookieParser())

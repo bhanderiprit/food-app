@@ -9,7 +9,21 @@ import multer from 'multer'
 const router = express.Router()
 const upload = multer({
     storage: multer.memoryStorage(),
-})
+
+    limits: {
+        fileSize: 10 * 1024 * 1024
+    },
+
+    fileFilter: (req, file, cb) => {
+
+        if (file.mimetype.startsWith("video/")) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only video files are allowed."));
+        }
+
+    }
+});
 router.post('/',authFoodPartner,upload.single('video'),createFood)
 router.get('/getAllFood',UserAuth,getAllFood)
 router.get('/profile/:_id',getFoodPartnerById)

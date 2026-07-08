@@ -3,10 +3,11 @@ import {register,refresh,login, logout, logoutAll ,verifyEmail,registerFoodPartn
 import UserAuth from '../middleware/UserAuth.middleware.js'
 import authFoodPartner from '../middleware/foodPartner.middleware.js'
 import { getFoodParetner } from '../controllers/food.controller.js'
+import rateLimit from 'express-rate-limit'
 
 const router = express.Router()
 
-router.post('/user/register',register)
+router.post('/user/register',rateLimit,register)
 router.post('/user/refresh',refresh)
 router.post('/user/login',login)
 router.get('/user/logout',logout)
