@@ -117,26 +117,26 @@ async function login(req, res) {
         expiresIn: '7d'
     })
 
-    const refreshTokenHash = crypto
-        .createHash("sha256")
-        .update(refreshToken)
-        .digest("hex");
+    // const refreshTokenHash = crypto
+    //     .createHash("sha256")
+    //     .update(refreshToken)
+    //     .digest("hex");
     
 
 
-    const session = await sessionModel.create({
-        user: user._id,
-        refreshTokenHash,
-        ip: req.ip,
-        userAgent: req.headers['user-agent']
+    // const session = await sessionModel.create({
+    //     user: user._id,
+    //     refreshTokenHash,
+    //     ip: req.ip,
+    //     userAgent: req.headers['user-agent']
 
-    })
-    const accessToken = jwt.sign({
-        id: user._id,
-        sessionID: session._id
-    }, config.JWT, {
-        expiresIn: '15m'
-    })
+    // })
+    // const accessToken = jwt.sign({
+    //     id: user._id,
+    //     sessionID: session._id
+    // }, config.JWT, {
+    //     expiresIn: '15m'
+    // })
 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -151,8 +151,8 @@ async function login(req, res) {
             id: user._id,
             username: user.username,
             email: user.email
-        },
-        accessToken
+        }
+        // accessToken
     });
 
 }
@@ -304,7 +304,18 @@ async function logoutAll(req, res) {
 }
 
 async function verifyEmail(req,res){
-    const {email,otp} = req.body
+    const {otp} = req.body
+    const {id} = req.params
+
+    const user = await userModel.findById(id)
+
+    if(!user){
+        return res.status(400).json({
+            message : 'user not found'
+        })
+    }
+
+    const email = user.email
 
     if (!email || !otp){
         return res.status(400).json({
@@ -328,12 +339,22 @@ async function verifyEmail(req,res){
         })
     }
 
-    const user = await userModel.findByIdAndUpdate(otpDoc.user,{verified : true})
+    const updetedUser = await userModel.findByIdAndUpdate(otpDoc.user,{verified : true})
 
-    await otpModel.deleteMany({user : otpDoc.user})
+    await otpModel.deleteMany({updetedUser : otpDoc.user})
+
+    const refreshToken = jwt.sign({id : updetedUser._id},config.JWT,{expiresIn : "7d" })
+
+    res.cookie('refreshToken',refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
 
     return res.status(200).json({
-    message : 'email verified'
+    message : 'email verified',
+    updetedUser
 })
 }
 

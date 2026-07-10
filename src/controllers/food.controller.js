@@ -29,8 +29,6 @@ async function createFood(req,res) {
     
 }
 
-
-
 async function getAllFood(req, res) {
   try {
     const userId = req.user._id;

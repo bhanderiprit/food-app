@@ -12,7 +12,7 @@ router.post('/user/refresh',refresh)
 router.post('/user/login',login)
 router.get('/user/logout',logout)
 router.get('/user/logoutAll',logoutAll)
-router.post('/user/verifyEmail',verifyEmail)
+router.post('/user/verifyEmail/:id',verifyEmail)
 router.get('/user/me', UserAuth, getMe);
 
 
