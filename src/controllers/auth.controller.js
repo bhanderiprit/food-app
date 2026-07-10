@@ -328,6 +328,14 @@ async function verifyEmail(req,res){
     .update(otp)
     .digest('hex')
 
+    console.log(otp);
+    console.log(id);
+    console.log(email);
+    
+    
+    console.log(otpHash);
+    
+
     const otpDoc = await otpModel.findOne({
         email,
         otp : otpHash
