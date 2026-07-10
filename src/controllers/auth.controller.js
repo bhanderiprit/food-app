@@ -9,6 +9,7 @@ import {sendEmail} from "../service/email.service.js";
 import otpModel from "../models/otps.model.js";
 import { generateOTP, getOtpHtml } from "../utils/email.utils.js"
 import foodPartnerModel from "../models/foodPartner.model.js";
+import { log } from "console";
 
 async function register(req, res) {
     try {
@@ -252,25 +253,25 @@ async function logout(req, res) {
         .digest("hex");
 
 
-    const session = await sessionModel.findOne({
-        refreshTokenHash: tokenHash,
-        revoked: false
-    })
+    // const session = await sessionModel.findOne({
+    //     refreshTokenHash: tokenHash,
+    //     revoked: false
+    // })
 
-    if (!session) {
-        return res.status(400).json({
-            message: 'session not found'
-        })
-    }
+    // if (!session) {
+    //     return res.status(400).json({
+    //         message: 'session not found'
+    //     })
+    // }
 
-    session.revoked = true
+    // session.revoked = true
 
-    await session.save()
+    // await session.save()
 
     res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict'
+        sameSite: 'none'
     });
     return res.status(200).json({
         message: 'logged out successfully'
@@ -306,7 +307,8 @@ async function logoutAll(req, res) {
 async function verifyEmail(req,res){
     const {otp} = req.body
     const {id} = req.params
-
+    console.log(id);
+    
     const user = await userModel.findById(id)
 
     if(!user){
@@ -331,8 +333,6 @@ async function verifyEmail(req,res){
     console.log(otp);
     console.log(id);
     console.log(email);
-    
-    
     console.log(otpHash);
     
 
