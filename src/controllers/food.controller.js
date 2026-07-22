@@ -32,11 +32,20 @@ async function createFood(req,res) {
 async function getAllFood(req, res) {
   try {
     const userId = req.user._id;
+    const cursor = req.query.cursor; // Get the cursor from the query parameters
+    const LIMIT = 2; // Set the limit for pagination
+
+    const query = {}
+
+    if (cursor) {
+        query._id = { $lt: cursor }; // Fetch records with _id less than the cursor
+    }
 
     const foods = await foodModel
-      .find()
+      .find(query)
       .populate("foodPartner", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(LIMIT); 
 
     const likedFoods = await likesModel.find({
       user: userId,
@@ -61,9 +70,14 @@ async function getAllFood(req, res) {
       isSaved: savedFoodIds.includes(food._id.toString()),
     }));
 
+    const nextCursor = foods.length > 0 ? foods[foods.length - 1]._id : null;
+    const hasMore = foods.length === LIMIT;
+
     res.status(200).json({
       message: "Foods fetched successfully",
       foods: foodsWithStatus,
+      nextCursor,
+      hasMore
     });
   } catch (error) {
     res.status(500).json({
